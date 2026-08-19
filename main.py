@@ -40,26 +40,40 @@ def pygame_queue_event():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return
-
-
-while True:
-    log_state()
-    pygame_queue_event()
-    
-    #Drawing elements into the screen
-    screen.fill("black")
-    for element in drawable:
-        element.draw(screen)
-    
-    #Updating data and position
-    pygame.display.flip()
-    updatable.update(dt)
+        
+def game_over_check():
     for ast in asteroids:
         if ast.collides_with(player):
             log_event("player_hit")
             print("Game over!")
             sys.exit(1)
-    dt = clock.tick(60) / 1000
+            
+def asteroid_state_check():
+    for ast in asteroids:
+        for shot in shots:
+            if shot.collides_with(ast):
+                log_event("asteroid_shot")
+                shot.kill()
+                ast.split()
+                break    
 
+while True:
+    log_state()
+    pygame_queue_event()
+
+    # Updating state and position
+    updatable.update(dt)
+
+    # Checking collisions after movement
+    game_over_check()
+    asteroid_state_check()
+
+    # Drawing elements onto the screen
+    screen.fill("black")
+    for element in drawable:
+        element.draw(screen)
+
+    pygame.display.flip()
+    dt = clock.tick(60) / 1000
 if __name__ == "__main__":
     main()
